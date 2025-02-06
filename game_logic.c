@@ -44,6 +44,8 @@ void menu()
 void pvp()
 {
     board_state *board_s = init_board();
+    position_list *pos_l = empty_list();
+    pos_l = save_position(board_s, pos_l);
     int mode = 1;
     char color = 'w';
     print_board(board_s, empty_piece(), empty_coords());
@@ -63,7 +65,7 @@ void pvp()
                 end_game(board_s, 'w');
                 return;
             }
-            else if (is_stalemate(board_s, 'b') || board_s->fifty_move_rule > 49)
+            else if (is_stalemate(board_s, 'b') || board_s->fifty_move_rule > 49 || threefold_repetition(board_s, pos_l, 0))
             {
                 end_game(board_s, '=');
                 return;
@@ -78,7 +80,7 @@ void pvp()
                 end_game(board_s, 'b');
                 return;
             }
-            else if (is_stalemate(board_s, 'w') || board_s->fifty_move_rule > 49)
+            else if (is_stalemate(board_s, 'w') || board_s->fifty_move_rule > 49 || threefold_repetition(board_s, pos_l, 0))
             {
                 end_game(board_s, '=');
                 return;
@@ -86,6 +88,7 @@ void pvp()
             color = 'w';
             printf("white turn\n");
         }
+        pos_l = save_position(board_s, pos_l);
     }
     free(board_s);
     menu(true);
@@ -99,6 +102,8 @@ void pva()
 void semi_free()
 {
     board_state *board_s = init_board();
+    position_list *pos_l = empty_list();
+    pos_l = save_position(board_s, pos_l);
     int mode = 3;
     char color = ' ';
     print_board(board_s, empty_piece(), empty_coords());
@@ -120,11 +125,12 @@ void semi_free()
             end_game(board_s, 'b');
             return;
         }
-        else if (is_stalemate(board_s, 'w') || is_stalemate(board_s, 'b') || board_s->fifty_move_rule > 49)
+        else if (is_stalemate(board_s, 'w') || is_stalemate(board_s, 'b') || board_s->fifty_move_rule > 49 || threefold_repetition(board_s, pos_l, 0))
         {
             end_game(board_s, '=');
             return;
         }
+        pos_l = save_position(board_s, pos_l);
     }
     free(board_s);
     menu(true);
@@ -133,6 +139,8 @@ void semi_free()
 void free_mode()
 {
     board_state *board_s = init_board();
+    position_list *pos_l = empty_list();
+    pos_l = save_position(board_s, pos_l);
     int mode = 4;
     char color = ' ';
     print_board(board_s, empty_piece(), empty_coords());
@@ -159,11 +167,12 @@ void free_mode()
             end_game(board_s, 'b');
             return;
         }
-        else if (is_stalemate(board_s, 'w') || is_stalemate(board_s, 'b') || board_s->fifty_move_rule > 50)
+        else if (is_stalemate(board_s, 'w') || is_stalemate(board_s, 'b') || board_s->fifty_move_rule > 50 || threefold_repetition(board_s, pos_l, 0))
         {
             end_game(board_s, '=');
             return;
         }
+        pos_l = save_position(board_s, pos_l);
     }
     free(board_s);
     menu(true);
@@ -209,7 +218,7 @@ board_state *turn(board_state *board_s, int mode, char color)
  */
 void end_game(board_state *board_s, char color_winner)
 {
-    if (color_winner != ' ')
+    if (color_winner == 'w' || color_winner == 'b')
     {
         dislplay_victory(color_winner);
     }

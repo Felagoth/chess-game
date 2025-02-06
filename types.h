@@ -34,4 +34,10 @@ typedef struct board_state
     int fifty_move_rule;
 } board_state;
 
+typedef struct position_list
+{
+    board_state *board_s;
+    struct position_list *tail;
+} position_list;
+
 #endif
