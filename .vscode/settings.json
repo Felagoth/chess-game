@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "stdlib.h": "c",
+        "legal_moves.h": "c",
+        "chess_logic.h": "c"
+    }
+}
