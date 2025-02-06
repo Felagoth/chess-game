@@ -63,7 +63,7 @@ void pvp()
                 end_game(board_s, 'w');
                 return;
             }
-            else if (is_stalemate(board_s, 'b'))
+            else if (is_stalemate(board_s, 'b') || board_s->fifty_move_rule > 50)
             {
                 end_game(board_s, '=');
                 return;
@@ -78,7 +78,7 @@ void pvp()
                 end_game(board_s, 'b');
                 return;
             }
-            else if (is_stalemate(board_s, 'w'))
+            else if (is_stalemate(board_s, 'w') || board_s->fifty_move_rule > 50)
             {
                 end_game(board_s, '=');
                 return;
@@ -120,7 +120,7 @@ void semi_free()
             end_game(board_s, 'b');
             return;
         }
-        else if (is_stalemate(board_s, 'w') || is_stalemate(board_s, 'b'))
+        else if (is_stalemate(board_s, 'w') || is_stalemate(board_s, 'b') || board_s->fifty_move_rule > 50)
         {
             end_game(board_s, '=');
             return;
@@ -159,7 +159,7 @@ void free_mode()
             end_game(board_s, 'b');
             return;
         }
-        else if (is_stalemate(board_s, 'w') || is_stalemate(board_s, 'b'))
+        else if (is_stalemate(board_s, 'w') || is_stalemate(board_s, 'b') || board_s->fifty_move_rule > 50)
         {
             end_game(board_s, '=');
             return;

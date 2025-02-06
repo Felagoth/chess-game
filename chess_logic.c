@@ -182,6 +182,15 @@ board_state *move_piece(board_state *board_s, coords init_coords, coords new_coo
     board_s->board[new_coords.x][new_coords.y].name = move_piece.name;
     board_s->board[new_coords.x][new_coords.y].color = move_piece.color;
     board_s->board[init_coords.x][init_coords.y] = empty_piece();
+    // fifty move rule
+    if (dest_piece.name == ' ' && move_piece.name != 'P')
+    {
+        board_s->fifty_move_rule++;
+    }
+    else
+    {
+        board_s->fifty_move_rule = 0;
+    }
     // printf("move_piece: %c (%d, %d) -> (%d, %d)\n", move_piece.name, init_coords.x, init_coords.y, new_coords.x, new_coords.y);
     if (move_piece.name == 'P')
     {
@@ -375,6 +384,7 @@ board_state *init_board()
     board_s->game_ended = false;
     board_s->black_pawn_passant = -1;
     board_s->white_pawn_passant = -1;
+    board_s->fifty_move_rule = 0;
     return board_s;
 }
 
