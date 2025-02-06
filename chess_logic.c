@@ -266,11 +266,50 @@ bool is_checkmate(board_state *board_s, char color)
     }
     coords init_coords;
     coords new_coords;
+    piece piece;
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
         {
-            piece piece = board[i][j];
+            piece = board[i][j];
+            if (piece.color == color)
+            {
+                init_coords.x = i;
+                init_coords.y = j;
+                for (int k = 0; k < 8; k++)
+                {
+                    for (int l = 0; l < 8; l++)
+                    {
+                        new_coords.x = k;
+                        new_coords.y = l;
+                        if (can_move_heuristic(board_s, piece, init_coords, new_coords, true))
+                        {
+                            printf("can move: %c (%d, %d) -> (%d, %d)\n", piece.name, init_coords.x, init_coords.y, new_coords.x, new_coords.y);
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
+bool is_stalemate(board_state *board_s, char color)
+{
+    piece(*board)[8] = board_s->board;
+    if (is_check(board_s, color))
+    {
+        return false;
+    }
+    coords init_coords;
+    coords new_coords;
+    piece piece;
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            piece = board[i][j];
             if (piece.color == color)
             {
                 init_coords.x = i;

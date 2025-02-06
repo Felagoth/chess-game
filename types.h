@@ -31,12 +31,7 @@ typedef struct board_state
     bool game_ended;
     int black_pawn_passant; // -1 if no pawn can be taken en passant, otherwise the column of the pawn
     int white_pawn_passant;
+    int number_pos_repet; // just for fun
 } board_state;
-
-typedef struct coord_array
-{
-    coords coords[64];
-    int size;
-} coord_array;
 
 #endif

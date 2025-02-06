@@ -19,6 +19,7 @@ bool can_move_heuristic(board_state *board_s, piece piece, coords init_co, coord
 bool is_attacked(board_state *board_s, coords co, char color, bool check_would_stop);
 bool is_check(board_state *board_s, char color);
 bool is_checkmate(board_state *board_s, char color);
+bool is_stalemate(board_state *board_s, char color);
 
 board_state *move_pawn_handling(board_state *board_s, piece move_piece, piece dest_piece, coords init_coords, coords new_coords);
 board_state *move_king_handling(board_state *board_s, piece move_piece, coords init_coords, coords new_coords);

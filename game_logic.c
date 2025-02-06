@@ -63,6 +63,11 @@ void pvp()
                 end_game(board_s, 'w');
                 return;
             }
+            else if (is_stalemate(board_s, 'b'))
+            {
+                end_game(board_s, '=');
+                return;
+            }
             color = 'b';
             printf("black turn\n");
         }
@@ -71,6 +76,11 @@ void pvp()
             if (check_checkmate(board_s, 'w'))
             {
                 end_game(board_s, 'b');
+                return;
+            }
+            else if (is_stalemate(board_s, 'w'))
+            {
+                end_game(board_s, '=');
                 return;
             }
             color = 'w';
@@ -99,19 +109,20 @@ void semi_free()
         {
             return;
         }
-        // check for checkmate
+        // check for checkmate / end game
         if (check_checkmate(board_s, 'w'))
         {
-            dislplay_victory('b');
-            free(board_s);
-            menu(true);
+            end_game(board_s, 'b');
             return;
         }
         else if (check_checkmate(board_s, 'b'))
         {
-            dislplay_victory('w');
-            free(board_s);
-            menu(true);
+            end_game(board_s, 'b');
+            return;
+        }
+        else if (is_stalemate(board_s, 'w') || is_stalemate(board_s, 'b'))
+        {
+            end_game(board_s, '=');
             return;
         }
     }
@@ -133,14 +144,24 @@ void free_mode()
             return;
         }
         // check for checkmate
+        if (board_s == NULL)
+        {
+            return;
+        }
+        // check for checkmate / end game
         if (check_checkmate(board_s, 'w'))
         {
-            dislplay_victory('w');
+            end_game(board_s, 'b');
             return;
         }
         else if (check_checkmate(board_s, 'b'))
         {
-            dislplay_victory('b');
+            end_game(board_s, 'b');
+            return;
+        }
+        else if (is_stalemate(board_s, 'w') || is_stalemate(board_s, 'b'))
+        {
+            end_game(board_s, '=');
             return;
         }
     }
