@@ -7,12 +7,8 @@
 #include "chess_logic.h"
 #include "interface.h"
 
-void menu(bool wait)
+void menu()
 {
-    if (wait)
-    {
-        wait_for_enter();
-    }
     int mode = prompt_menu();
     if (mode == 0)
     {
@@ -62,27 +58,23 @@ void pvp()
         // end of turn
         if (color == 'w')
         {
-            if (check_checkmate(board_s, 'w'))
+            if (check_checkmate(board_s, 'b'))
             {
-                dislplay_victory('b');
-                free(board_s);
-                menu(true);
+                end_game(board_s, 'w');
                 return;
             }
             color = 'b';
-            printf("black trun\n");
+            printf("black turn\n");
         }
         else
         {
-            if (check_checkmate(board_s, 'b'))
+            if (check_checkmate(board_s, 'w'))
             {
-                dislplay_victory('w');
-                free(board_s);
-                menu(true);
+                end_game(board_s, 'b');
                 return;
             }
             color = 'w';
-            printf("white trun\n");
+            printf("white turn\n");
         }
     }
     free(board_s);
@@ -143,15 +135,13 @@ void free_mode()
         // check for checkmate
         if (check_checkmate(board_s, 'w'))
         {
-            dislplay_victory('b');
-            free(board_s);
-            printf("test");
+            dislplay_victory('w');
+            return;
         }
         else if (check_checkmate(board_s, 'b'))
         {
-            dislplay_victory('w');
-            free(board_s);
-            printf("test");
+            dislplay_victory('b');
+            return;
         }
     }
     free(board_s);
@@ -173,8 +163,7 @@ board_state *turn(board_state *board_s, int mode, char color)
     init_co = piece_selection(board_s, mode, color);
     if (is_empty_coords(init_co))
     {
-        free(board_s);
-        menu(true);
+        end_game(board_s, ' ');
         return NULL;
     }
     selected_piece = get_piece(board_s->board, init_co);
@@ -182,8 +171,7 @@ board_state *turn(board_state *board_s, int mode, char color)
     selected_move = move_selection(board_s, selected_piece, init_co, mode);
     if (is_empty_move(selected_move))
     {
-        free(board_s);
-        menu(true);
+        end_game(board_s, ' ');
         return NULL;
     }
     // move piece
@@ -191,4 +179,29 @@ board_state *turn(board_state *board_s, int mode, char color)
     selected_piece = empty_piece();
     print_board(board_s, selected_piece, init_co);
     return board_s;
+}
+
+/*
+ * end_game: end the game and display the winner
+ * @param board_s: the board state
+ * @param color_winner: the color of the winner, '=' if draw, ' ' otherwise
+ */
+void end_game(board_state *board_s, char color_winner)
+{
+    if (color_winner != ' ')
+    {
+        dislplay_victory(color_winner);
+    }
+    else if (color_winner == '=')
+    {
+        display_draw();
+    }
+    else
+    {
+        display_other_stop();
+    }
+    board_s->game_ended = true;
+    free(board_s);
+    wait_for_enter();
+    menu();
 }
