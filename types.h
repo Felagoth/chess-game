@@ -31,12 +31,13 @@ typedef struct board_state
     bool game_ended;
     int black_pawn_passant; // -1 if no pawn can be taken en passant, otherwise the column of the pawn
     int white_pawn_passant;
+    int fifty_move_rule;
 } board_state;
 
-typedef struct coord_array
+typedef struct position_list
 {
-    coords coords[64];
-    int size;
-} coord_array;
+    board_state *board_s;
+    struct position_list *tail;
+} position_list;
 
 #endif

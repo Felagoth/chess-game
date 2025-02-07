@@ -46,6 +46,76 @@ bool is_empty_move(move move)
     return is_empty_coords(move.init_co) && is_empty_coords(move.dest_co);
 }
 
+bool are_same_piece(piece piece1, piece piece2)
+{
+    return piece1.name == piece2.name && piece1.color == piece2.color;
+}
+
+position_list *empty_list()
+{
+    return NULL;
+}
+
+position_list *save_position(board_state *board_s, position_list *pos_l)
+{
+    board_state *board_s_copy = malloc(sizeof(board_state));
+    if (board_s_copy == NULL)
+    {
+        return NULL;
+    }
+    *board_s_copy = *board_s;
+    position_list *new_list = malloc(sizeof(position_list));
+    if (new_list == NULL)
+    {
+        return NULL;
+    }
+    new_list->board_s = board_s_copy;
+    new_list->tail = pos_l;
+    return new_list;
+}
+
+bool are_same_pos(board_state *board_s1, board_state *board_s2)
+{
+    piece(*board1)[8] = board_s1->board;
+    piece(*board2)[8] = board_s2->board;
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if (!are_same_piece(board1[i][j], board2[i][j]))
+            {
+                return false;
+            }
+        }
+    }
+    // clang-format off
+    return board_s1->black_kingside_castlable == board_s2->black_kingside_castlable && board_s1->black_queenside_castlable == board_s2->black_queenside_castlable
+        && board_s1->white_kingside_castlable == board_s2->white_kingside_castlable && board_s1->white_queenside_castlable == board_s2->white_queenside_castlable
+        && board_s1->black_pawn_passant == board_s2->black_pawn_passant && board_s1->white_pawn_passant == board_s2->white_pawn_passant;
+    // clang-format on
+}
+
+bool threefold_repetition(board_state *board_s, position_list *pos_l, int number_of_repetitions)
+{
+    if (pos_l == NULL)
+    {
+        return false;
+    }
+    else
+    {
+        // print_board(pos_l->board_s, empty_piece(), empty_coords());
+        if (are_same_pos(board_s, pos_l->board_s))
+        {
+            number_of_repetitions++;
+        }
+        if (number_of_repetitions > 2)
+        {
+            return true;
+        }
+        return threefold_repetition(board_s, pos_l->tail, number_of_repetitions);
+    }
+}
+
 piece get_piece(piece board[8][8], coords coords)
 {
     piece piece;
@@ -182,6 +252,15 @@ board_state *move_piece(board_state *board_s, coords init_coords, coords new_coo
     board_s->board[new_coords.x][new_coords.y].name = move_piece.name;
     board_s->board[new_coords.x][new_coords.y].color = move_piece.color;
     board_s->board[init_coords.x][init_coords.y] = empty_piece();
+    // fifty move rule
+    if (dest_piece.name == ' ' && move_piece.name != 'P')
+    {
+        board_s->fifty_move_rule++;
+    }
+    else
+    {
+        board_s->fifty_move_rule = 0;
+    }
     // printf("move_piece: %c (%d, %d) -> (%d, %d)\n", move_piece.name, init_coords.x, init_coords.y, new_coords.x, new_coords.y);
     if (move_piece.name == 'P')
     {
@@ -266,11 +345,12 @@ bool is_checkmate(board_state *board_s, char color)
     }
     coords init_coords;
     coords new_coords;
+    piece piece;
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
         {
-            piece piece = board[i][j];
+            piece = board[i][j];
             if (piece.color == color)
             {
                 init_coords.x = i;
@@ -284,6 +364,43 @@ bool is_checkmate(board_state *board_s, char color)
                         if (can_move_heuristic(board_s, piece, init_coords, new_coords, true))
                         {
                             printf("can move: %c (%d, %d) -> (%d, %d)\n", piece.name, init_coords.x, init_coords.y, new_coords.x, new_coords.y);
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
+bool is_stalemate(board_state *board_s, char color)
+{
+    piece(*board)[8] = board_s->board;
+    if (is_check(board_s, color))
+    {
+        return false;
+    }
+    coords init_coords;
+    coords new_coords;
+    piece piece;
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            piece = board[i][j];
+            if (piece.color == color)
+            {
+                init_coords.x = i;
+                init_coords.y = j;
+                for (int k = 0; k < 8; k++)
+                {
+                    for (int l = 0; l < 8; l++)
+                    {
+                        new_coords.x = k;
+                        new_coords.y = l;
+                        if (can_move_heuristic(board_s, piece, init_coords, new_coords, true))
+                        {
                             return false;
                         }
                     }
@@ -336,6 +453,7 @@ board_state *init_board()
     board_s->game_ended = false;
     board_s->black_pawn_passant = -1;
     board_s->white_pawn_passant = -1;
+    board_s->fifty_move_rule = 0;
     return board_s;
 }
 

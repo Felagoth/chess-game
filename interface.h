@@ -12,6 +12,8 @@ coords piece_selection(board_state *board_s, int mode, char color);
 move move_selection(board_state *board_s, piece selected_piece, coords init_co, int mode);
 bool check_checkmate(board_state *board_s, char color);
 void dislplay_victory(char color);
+void display_draw();
+void display_other_stop();
 void wait_for_enter();
 
 #endif

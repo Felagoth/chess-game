@@ -78,7 +78,6 @@ coords piece_selection(board_state *board_s, int mode, char color)
         }
         init_co.x = init_row - 1;
         init_co.y = (int)(init_column - 'a');
-        printf("init_co: %d %d\n", init_co.x, init_co.y);
 
         // check if the coordinates are valid
         if (init_co.x < 0 || init_co.x >= 8 || init_co.y < 0 || init_co.y >= 8)
@@ -162,7 +161,6 @@ move move_selection(board_state *board_s, piece selected_piece, coords init_co, 
 
 bool check_checkmate(board_state *board_s, char color)
 {
-    printf("Checking for checkmate\n");
     if (is_check(board_s, color))
     {
         printf("Check!\n");
@@ -185,6 +183,20 @@ void dislplay_victory(char color)
     {
         printf("\nVictory for black\n");
     }
+    fflush(stdout);
+    getchar();
+}
+
+void display_draw()
+{
+    printf("\nDraw\n");
+    fflush(stdout);
+    getchar();
+}
+
+void display_other_stop()
+{
+    printf("\nThe game stopped before true end\n");
     fflush(stdout);
     getchar();
 }
