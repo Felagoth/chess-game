@@ -2,16 +2,16 @@
 CC = gcc
 
 # Define the compiler flags
-CFLAGS = -Wall
+CFLAGS = -Wall -Iinclude
 
 # Define the source files
-SRCS = legal_moves.c chess_logic.c interface.c game_logic.c main.c
+SRCS = $(wildcard src/*.c)
 
 # Define the object files directory
 OBJ_DIR = builds/object_files
 
 # Define the object files
-OBJS = $(patsubst %.c, $(OBJ_DIR)/%.o, $(SRCS))
+OBJS = $(patsubst src/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 
 # Define the output directory and executable name
 BUILD_DIR = builds
@@ -29,7 +29,7 @@ $(EXECUTABLE): $(OBJS) | $(BUILD_DIR) $(OBJ_DIR)
 	$(CC) $(CFLAGS) -o $@ $^
 
 # Rule to compile the source files into object files
-$(OBJ_DIR)/%.o: %.c | $(OBJ_DIR)
+$(OBJ_DIR)/%.o: src/%.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Rule to clean up the build artifacts
