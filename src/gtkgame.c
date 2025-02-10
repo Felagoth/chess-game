@@ -8,11 +8,11 @@
 #include "chess_logic.h"
 
 static board_state *board_s;
+static position_list *pos_l = NULL;
 static int mode;
 static char color;
 static bool is_selected = false;
 static coords init_co;
-// create the chess board
 GtkWidget *board_widgets[8][8];
 
 void on_activate(GtkApplication *app)
@@ -20,7 +20,7 @@ void on_activate(GtkApplication *app)
     GtkWidget *window = gtk_application_window_new(app);
     GtkWidget *start_button = gtk_button_new_with_label("Click to start");
     gtk_window_set_title(GTK_WINDOW(window), "Chess");
-    gtk_window_set_default_size(GTK_WINDOW(window), 900, 700);
+    gtk_window_set_default_size(GTK_WINDOW(window), 1200, 800);
     gtk_window_set_child(GTK_WINDOW(window), start_button);
     g_signal_connect(start_button, "clicked", G_CALLBACK(menugtk), window);
     gtk_widget_show(window);
@@ -50,10 +50,10 @@ void menugtk(GtkApplication *app, GtkWidget *window)
     gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
     // Connect the buttons to the callback functions
-    g_signal_connect(pvp_button, "clicked", G_CALLBACK(play1), window);
+    g_signal_connect(pvp_button, "clicked", G_CALLBACK(pvp), window);
     g_signal_connect(pva_button, "clicked", G_CALLBACK(pva), NULL);
-    g_signal_connect(semi_free_button, "clicked", G_CALLBACK(semi_free), NULL);
-    g_signal_connect(free_mode_button, "clicked", G_CALLBACK(free_mode), NULL);
+    g_signal_connect(semi_free_button, "clicked", G_CALLBACK(semi_free), window);
+    g_signal_connect(free_mode_button, "clicked", G_CALLBACK(free_mode), window);
     g_signal_connect(settings_button, "clicked", G_CALLBACK(settings), NULL);
     // Show the window
     gtk_widget_show(window);
@@ -121,22 +121,23 @@ void on_square_clicked(GtkGestureClick *gesture, GtkButton *event, GtkWidget *ev
     int row, column;
     row = top;
     column = left - 1;
-    printf("clicked on square %c%d\n", 'a' + column, 8 - row);
+    // printf("clicked on square %c%d\n", 'a' + column, 8 - row);
     coords co;
     co.x = 7 - row;
     co.y = column;
     if (is_selected)
     {
-        if (can_move(board_s, board_s->board[init_co.x][init_co.y], init_co, co, true))
+        if (can_move(board_s, board_s->board[init_co.x][init_co.y], init_co, co, true) || mode == 4)
         {
             board_s = move_piece(board_s, init_co, co);
             is_selected = false;
+            pos_l = save_position(board_s, pos_l);
             if (mode < 3)
             {
                 color = (color == 'w') ? 'b' : 'w';
             }
         }
-        else if (!is_empty(board_s->board[co.x][co.y]) && (board_s->board[co.x][co.y].color == color || mode > 3))
+        else if (!is_empty(board_s->board[co.x][co.y]) && (board_s->board[co.x][co.y].color == color || mode >= 3))
         {
             init_co = co;
             is_selected = true;
@@ -149,7 +150,7 @@ void on_square_clicked(GtkGestureClick *gesture, GtkButton *event, GtkWidget *ev
     }
     else
     {
-        if (!is_empty(board_s->board[co.x][co.y]) && (board_s->board[co.x][co.y].color == color || mode > 3))
+        if (!is_empty(board_s->board[co.x][co.y]) && (board_s->board[co.x][co.y].color == color || mode >= 3))
         {
             init_co = co;
             is_selected = true;
@@ -160,6 +161,29 @@ void on_square_clicked(GtkGestureClick *gesture, GtkButton *event, GtkWidget *ev
     {
         init_co = empty_coords();
     }
+    GtkWidget *window = gtk_widget_get_ancestor(eventbox, GTK_TYPE_WINDOW);
+    bool mate = is_mate(board_s, color);
+    char color2 = (color == 'w') ? 'b' : 'w';
+    if ((mate && !is_check(board_s, color)) || board_s->fifty_move_rule > 49 || threefold_repetition(board_s, pos_l, 0))
+    {
+        display_draw(window);
+    }
+    else if (is_check(board_s, color) && mate)
+    {
+        display_victory(color2, window);
+    }
+    else
+    {
+        mate = is_mate(board_s, color2);
+        if ((mate && !is_check(board_s, color)) || board_s->fifty_move_rule > 49 || threefold_repetition(board_s, pos_l, 0))
+        {
+            display_draw(window);
+        }
+        else if (is_check(board_s, color2) && mate)
+        {
+            display_victory(color, window);
+        }
+    }
 }
 
 void init_chess_window(GtkApplication *app, GtkWidget *window)
@@ -168,12 +192,15 @@ void init_chess_window(GtkApplication *app, GtkWidget *window)
     GtkWidget *label;
     GtkGesture *gesture;
     // Set the window default size
-    gtk_window_set_default_size(GTK_WINDOW(window), 900, 700);
+    gtk_window_set_default_size(GTK_WINDOW(window), 1200, 800);
     // Create the main grid
     GtkWidget *main_grid = gtk_grid_new();
     gtk_window_set_child(GTK_WINDOW(window), main_grid); // Add the main grid to the window
-    gtk_grid_set_row_spacing(GTK_GRID(main_grid), 10);
-    gtk_grid_set_column_spacing(GTK_GRID(main_grid), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(main_grid), 40);
+    gtk_grid_set_column_spacing(GTK_GRID(main_grid), 40);
+    // center the main grid
+    gtk_widget_set_halign(main_grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(main_grid, GTK_ALIGN_CENTER);
     // Create the chess board grid
     GtkWidget *chess_grid = gtk_grid_new();
     gtk_grid_attach(GTK_GRID(main_grid), chess_grid, 0, 0, 1, 1); // Attach the chess grid to the main grid
@@ -258,14 +285,8 @@ void init_chess_window(GtkApplication *app, GtkWidget *window)
     gtk_widget_show(window);
 }
 
-void play1(GtkApplication *app, GtkWidget *window)
-{
-    mode = 1;
-    init_chess_window(app, window);
-}
-
 // launch the menu gtk window
-void menu()
+void start()
 {
     // Create a new application
     GtkApplication *app = gtk_application_new("com.example.GtkApplication",
@@ -275,9 +296,10 @@ void menu()
     g_application_run(G_APPLICATION(app), 0, NULL);
 }
 
-void pvp(GtkApplication *app)
+void pvp(GtkApplication *app, GtkWidget *window)
 {
-    printf("pvp available soon\n");
+    mode = 1;
+    init_chess_window(app, window);
 }
 
 void pva(GtkApplication *app)
@@ -285,23 +307,129 @@ void pva(GtkApplication *app)
     printf("pva available soon\n");
 }
 
-void semi_free(GtkApplication *app)
+void semi_free(GtkApplication *app, GtkWidget *window)
 {
-    printf("semi free mode available soon\n");
+    mode = 3;
+    init_chess_window(app, window);
 }
 
-void free_mode(GtkApplication *app)
+void free_mode(GtkApplication *app, GtkWidget *window)
 {
-    printf("free mode available soon\n");
+    mode = 4;
+    init_chess_window(app, window);
 }
 
 void settings(GtkApplication *app)
 {
     printf("settings available soon\n");
-    menu();
+}
+
+// Structure to hold the promotion choice and window reference
+typedef struct
+{
+    char choice;
+    GtkWidget *window;
+} PromotionData;
+
+// Callback function for button clicks
+void on_promotion_button_clicked(GtkButton *button, gpointer data)
+{
+    PromotionData *promotion_data = (PromotionData *)data;
+    const gchar *button_label = gtk_button_get_label(button);
+
+    // Set the choice based on the button label
+    if (g_strcmp0(button_label, "Queen") == 0)
+    {
+        promotion_data->choice = 'Q';
+    }
+    else if (g_strcmp0(button_label, "Rook") == 0)
+    {
+        promotion_data->choice = 'R';
+    }
+    else if (g_strcmp0(button_label, "Bishop") == 0)
+    {
+        promotion_data->choice = 'B';
+    }
+    else if (g_strcmp0(button_label, "Knight") == 0)
+    {
+        promotion_data->choice = 'N';
+    }
+
+    // Close the window
+    if (promotion_data->window != NULL)
+    {
+        gtk_window_destroy(GTK_WINDOW(promotion_data->window));
+        promotion_data->window = NULL;
+    }
 }
 
 char prompt_promotion(board_state *board_state, piece move_piece, coords init_coords, coords new_coords)
 {
-    return 'Q';
+    // Create a new window
+    GtkWidget *promotion_window = gtk_window_new();
+    gtk_window_set_title(GTK_WINDOW(promotion_window), "Promote Pawn");
+    gtk_window_set_default_size(GTK_WINDOW(promotion_window), 600, 400);
+
+    // Create a grid to hold the buttons
+    GtkWidget *grid = gtk_grid_new();
+    gtk_window_set_child(GTK_WINDOW(promotion_window), grid);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 40);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 40);
+    gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
+
+    // Create buttons for promotion options
+    GtkWidget *button_queen = gtk_button_new_with_label("Queen");
+    GtkWidget *button_rook = gtk_button_new_with_label("Rook");
+    GtkWidget *button_bishop = gtk_button_new_with_label("Bishop");
+    GtkWidget *button_knight = gtk_button_new_with_label("Knight");
+
+    // Add buttons to the grid
+    gtk_grid_attach(GTK_GRID(grid), button_queen, 0, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), button_rook, 1, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), button_bishop, 0, 1, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), button_knight, 1, 1, 1, 1);
+
+    // Allocate memory for the promotion data
+    PromotionData *promotion_data = g_malloc(sizeof(PromotionData));
+    promotion_data->choice = '\0';
+    promotion_data->window = promotion_window;
+
+    // Connect button click signals
+    g_signal_connect(button_queen, "clicked", G_CALLBACK(on_promotion_button_clicked), promotion_data);
+    g_signal_connect(button_rook, "clicked", G_CALLBACK(on_promotion_button_clicked), promotion_data);
+    g_signal_connect(button_bishop, "clicked", G_CALLBACK(on_promotion_button_clicked), promotion_data);
+    g_signal_connect(button_knight, "clicked", G_CALLBACK(on_promotion_button_clicked), promotion_data);
+
+    // Show the window
+    gtk_widget_show(promotion_window);
+
+    // Run the GTK main loop until the window is closed
+    GMainContext *context = g_main_context_default();
+    while (promotion_window != NULL && gtk_widget_get_visible(promotion_window))
+    {
+        g_main_context_iteration(context, TRUE);
+    }
+
+    // Get the choice and free the data
+    char promotion_choice = promotion_data->choice;
+    g_free(promotion_data);
+
+    return promotion_choice;
+}
+
+void display_draw(GtkWidget *window)
+{
+    GtkWidget *dialog = gtk_message_dialog_new((GtkWindow *)window, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Draw!");
+    gtk_widget_show(dialog);
+    // destroy the dialog
+    g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_window_close), dialog);
+}
+
+void display_victory(char color, GtkWidget *window)
+{
+    printf("Checkmate!\n");
+    GtkWidget *dialog = gtk_message_dialog_new((GtkWindow *)window, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Victory for %s!", (color == 'w') ? "white" : "black");
+    gtk_widget_show(dialog);
+    g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_window_close), dialog);
 }

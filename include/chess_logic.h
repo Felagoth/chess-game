@@ -22,6 +22,7 @@ piece get_piece(piece board[8][8], coords coords);
 bool can_move_heuristic(board_state *board_s, piece piece, coords init_co, coords new_co, bool check_would_stop);
 bool is_attacked(board_state *board_s, coords co, char color, bool check_would_stop);
 bool is_check(board_state *board_s, char color);
+bool is_mate(board_state *board_s, char color);
 bool is_checkmate(board_state *board_s, char color);
 bool is_stalemate(board_state *board_s, char color);
 

@@ -2,6 +2,8 @@
     "files.associations": {
         "stdlib.h": "c",
         "legal_moves.h": "c",
-        "chess_logic.h": "c"
+        "chess_logic.h": "c",
+        "stdio.h": "c",
+        "types.h": "c"
     }
 }

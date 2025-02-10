@@ -5,16 +5,15 @@
 #include <gtk/gtk.h>
 #include "types.h"
 
-void menu();
-void play1(GtkApplication *app, GtkWidget *window);
+void start();
 void menugtk(GtkApplication *app, GtkWidget *window);
-void pvp(GtkApplication *app);
+void pvp(GtkApplication *app, GtkWidget *window);
 void pva(GtkApplication *app);
-void semi_free(GtkApplication *app);
-void free_mode(GtkApplication *app);
+void semi_free(GtkApplication *app, GtkWidget *window);
+void free_mode(GtkApplication *app, GtkWidget *window);
 void settings(GtkApplication *app);
-board_state *turn(board_state *board_s, int mode, char color);
-void end_game(board_state *board_s, char color_winner);
 char prompt_promotion(board_state *board_state, piece move_piece, coords init_coords, coords new_coords);
+void display_draw(GtkWidget *window);
+void display_victory(char color, GtkWidget *window);
 
 #endif
