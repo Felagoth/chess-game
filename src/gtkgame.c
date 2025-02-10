@@ -26,6 +26,12 @@ void on_activate(GtkApplication *app)
     gtk_widget_show(window);
 }
 
+void to_menugtk(GtkWidget *widget, GtkWidget *window)
+{
+    gtk_window_set_child(GTK_WINDOW(window), NULL);
+    menugtk(NULL, window);
+}
+
 void menugtk(GtkApplication *app, GtkWidget *window)
 {
     GtkWidget *pvp_button = gtk_button_new_with_label("play pvp");
@@ -61,6 +67,51 @@ void menugtk(GtkApplication *app, GtkWidget *window)
 
 char *get_label_piece(piece p)
 {
+    if (p.color == 'w')
+    {
+        switch (p.name)
+        {
+        case 'P':
+            return "♙";
+        case 'R':
+            return "♖";
+        case 'N':
+            return "♘";
+        case 'B':
+            return "♗";
+        case 'Q':
+            return "♕";
+        case 'K':
+            return "♔";
+        default:
+            return " ";
+        }
+    }
+    else
+    {
+        switch (p.name)
+        {
+        case 'P':
+            return "♟";
+        case 'R':
+            return "♜";
+        case 'N':
+            return "♞";
+        case 'B':
+            return "♝";
+        case 'Q':
+            return "♛";
+        case 'K':
+            return "♚";
+        default:
+            return " ";
+        }
+    }
+}
+
+/*
+char *get_label_piece(piece p)
+{
     char *label_piece = malloc(2 * sizeof(char));
     label_piece[0] = p.name;
     if (p.color == 'b')
@@ -69,7 +120,7 @@ char *get_label_piece(piece p)
     }
     label_piece[1] = '\0';
     return label_piece;
-}
+}*/
 
 void draw_board()
 {
@@ -162,13 +213,15 @@ void on_square_clicked(GtkGestureClick *gesture, GtkButton *event, GtkWidget *ev
         init_co = empty_coords();
     }
     GtkWidget *window = gtk_widget_get_ancestor(eventbox, GTK_TYPE_WINDOW);
-    bool mate = is_mate(board_s, color);
-    char color2 = (color == 'w') ? 'b' : 'w';
-    if ((mate && !is_check(board_s, color)) || board_s->fifty_move_rule > 49 || threefold_repetition(board_s, pos_l, 0))
+    char color1 = (color == 'w' || color == ' ') ? 'w' : 'b';
+    char color2 = (color1 == 'w') ? 'b' : 'w';
+    bool mate = is_mate(board_s, color1);
+    if ((mate && !is_check(board_s, color1)) || board_s->fifty_move_rule > 49 || threefold_repetition(board_s, pos_l, 0))
     {
+        // printf("mate: %d, check: %d, fifty: %d, threefold: %d\n", mate, is_check(board_s, color), board_s->fifty_move_rule, threefold_repetition(board_s, pos_l, 0));
         display_draw(window);
     }
-    else if (is_check(board_s, color) && mate)
+    else if (is_check(board_s, color1) && mate)
     {
         display_victory(color2, window);
     }
@@ -225,7 +278,7 @@ void init_chess_window(GtkApplication *app, GtkWidget *window)
         gtk_widget_add_css_class(eventbox, "square");
         gtk_grid_attach(GTK_GRID(chess_grid), eventbox, 0, i, 1, 1);
         gtk_box_append(GTK_BOX(eventbox), label);
-        gtk_widget_set_size_request(label, 30, 30);
+        gtk_widget_set_size_request(label, 70, 70);
         for (int j = 0; j < 8; j++)
         {
             gesture = gtk_gesture_click_new();
@@ -235,7 +288,7 @@ void init_chess_window(GtkApplication *app, GtkWidget *window)
             gtk_widget_add_controller(eventbox, GTK_EVENT_CONTROLLER(gesture));
             label = gtk_label_new(" ");
             // set label size
-            gtk_widget_set_size_request(label, 70, 70);
+            gtk_widget_set_size_request(label, 80, 80);
             gtk_box_append(GTK_BOX(eventbox), label);
             gtk_widget_add_css_class(board_widgets[i][j], "square");
             // set square color
@@ -267,7 +320,7 @@ void init_chess_window(GtkApplication *app, GtkWidget *window)
     // make the btton a normal size
     gtk_widget_set_size_request(menu_button, 60, 30);
     // Connect the button to the callback function
-    g_signal_connect(menu_button, "clicked", G_CALLBACK(menugtk), window);
+    g_signal_connect(menu_button, "clicked", G_CALLBACK(to_menugtk), window);
 
     // Init the chess board state
     board_s = init_board();

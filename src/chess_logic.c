@@ -122,10 +122,7 @@ piece get_piece(piece board[8][8], coords coords)
     {
         return empty_piece();
     }
-    piece piece;
-    piece.name = board[coords.x][coords.y].name;
-    piece.color = board[coords.x][coords.y].color;
-    return piece;
+    return board[coords.x][coords.y];
 }
 
 bool can_move_heuristic(board_state *board_s, piece piece, coords init_co, coords new_co, bool check_would_stop)
@@ -139,7 +136,7 @@ bool can_move_heuristic(board_state *board_s, piece piece, coords init_co, coord
         && !(piece.name == 'B' && abs(init_co.x - i) != abs(init_co.y - j))
         && !(piece.name == 'R' && init_co.x != i && init_co.y != j)
         && !(piece.name == 'Q' && (abs(init_co.x - i) != abs(init_co.y - j) && init_co.x != i && init_co.y != j))
-        && !(piece.name == 'K' &&( abs(init_co.x - i) > 1 || abs(init_co.y - j) > 1))
+        && !(piece.name == 'K' &&( abs(init_co.x - i) > 1 || abs(init_co.y - j) > 2))
         && can_move(board_s, piece, init_co, new_co, check_would_stop);
     // clang-format on
 }
@@ -264,7 +261,6 @@ board_state *move_piece(board_state *board_s, coords init_coords, coords new_coo
     {
         board_s->fifty_move_rule = 0;
     }
-    // printf("move_piece: %c (%d, %d) -> (%d, %d)\n", move_piece.name, init_coords.x, init_coords.y, new_coords.x, new_coords.y);
     if (move_piece.name == 'P')
     {
         board_s = move_pawn_handling(board_s, move_piece, dest_piece, init_coords, new_coords);
@@ -287,11 +283,13 @@ board_state *move_piece_forced(board_state *board_s, coords init_coords, coords 
     if (new_coords.y == 6 && init_coords.y == 4)
     {
         board_s->board[new_coords.x][5].name = 'R';
+        board_s->board[new_coords.x][5].color = move_piece.color;
         board_s->board[new_coords.x][7] = empty_piece();
     }
     else if (new_coords.y == 2 && init_coords.y == 4)
     {
         board_s->board[new_coords.x][3].name = 'R';
+        board_s->board[new_coords.x][3].color = move_piece.color;
         board_s->board[new_coords.x][0] = empty_piece();
     }
     // en passant
@@ -447,7 +445,6 @@ bool can_move(board_state *board_s, piece piece, coords init_co, coords new_co, 
     {
         return false;
     }
-
     if (check_would_stop)
     {
         board_state *new_board_s = malloc(sizeof(board_state));
@@ -458,11 +455,12 @@ bool can_move(board_state *board_s, piece piece, coords init_co, coords new_co, 
         *new_board_s = *board_s;
         // printf("can_move: %c (%d, %d) -> (%d, %d)\n", piece.name, init_co.x, init_co.y, new_co.x, new_co.y);
         new_board_s = move_piece_forced(new_board_s, init_co, new_co);
-        if (is_attacked(new_board_s, find_king(new_board_s, piece.color), piece.color, false))
+        if (is_check(new_board_s, piece.color))
         {
             return false;
         }
     }
+
     // printf("piece is %c of color %c\n", piece.name, piece.color);
     switch (piece.name)
     {

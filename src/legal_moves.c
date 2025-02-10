@@ -195,6 +195,7 @@ bool can_move_king(board_state *board_s, piece selected_piece, coords init_co, c
 {
     int newx = dest_co.x;
     int newy = dest_co.y;
+    // printf("can_move_king: %c (%d, %d) -> (%d, %d) castling rights: %d %d\n", selected_piece.color, init_co.x, init_co.y, newx, newy, board_s->white_kingside_castlable, board_s->white_queenside_castlable);
 
     if (is_attacked(board_s, dest_co, selected_piece.color, false))
     {
