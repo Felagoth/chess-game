@@ -15,5 +15,6 @@ void free_mode(GtkApplication *app);
 void settings(GtkApplication *app);
 board_state *turn(board_state *board_s, int mode, char color);
 void end_game(board_state *board_s, char color_winner);
+char prompt_promotion(board_state *board_state, piece move_piece, coords init_coords, coords new_coords);
 
 #endif

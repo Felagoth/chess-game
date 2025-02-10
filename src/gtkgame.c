@@ -125,7 +125,6 @@ void on_square_clicked(GtkGestureClick *gesture, GtkButton *event, GtkWidget *ev
     coords co;
     co.x = 7 - row;
     co.y = column;
-    printf("cos: %d, %d\n", co.x, co.y);
     if (is_selected)
     {
         if (can_move(board_s, board_s->board[init_co.x][init_co.y], init_co, co, true))
@@ -300,4 +299,9 @@ void settings(GtkApplication *app)
 {
     printf("settings available soon\n");
     menu();
+}
+
+char prompt_promotion(board_state *board_state, piece move_piece, coords init_coords, coords new_coords)
+{
+    return 'Q';
 }

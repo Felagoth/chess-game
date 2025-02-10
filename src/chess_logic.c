@@ -5,7 +5,7 @@
 #include "types.h"
 #include "legal_moves.h"
 #include "chess_logic.h"
-#include "interface.h"
+#include "gtkgame.h"
 
 piece empty_piece()
 {
