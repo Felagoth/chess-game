@@ -2,7 +2,10 @@
 CC = gcc
 
 # Define the compiler flags
-CFLAGS = -Wall -Iinclude
+CFLAGS = $(shell pkg-config --cflags gtk4) -Wall -Iinclude
+
+# Define the linker flags
+LDFLAGS = $(shell pkg-config --libs gtk4)
 
 # Define the source files
 SRCS = $(wildcard src/*.c)
@@ -15,7 +18,7 @@ OBJS = $(patsubst src/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 
 # Define the output directory and executable name
 BUILD_DIR = builds
-EXECUTABLE = $(BUILD_DIR)/chess_game_1.0
+EXECUTABLE = $(BUILD_DIR)/chess_game_2.0
 
 # Define the default target
 all: $(EXECUTABLE)
@@ -26,7 +29,7 @@ $(BUILD_DIR) $(OBJ_DIR):
 
 # Rule to link the object files into the executable
 $(EXECUTABLE): $(OBJS) | $(BUILD_DIR) $(OBJ_DIR)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Rule to compile the source files into object files
 $(OBJ_DIR)/%.o: src/%.c | $(OBJ_DIR)

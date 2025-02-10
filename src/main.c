@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "game_logic.h"
+#include "gtkgame.h"
 
 int main()
 {

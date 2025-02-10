@@ -118,6 +118,10 @@ bool threefold_repetition(board_state *board_s, position_list *pos_l, int number
 
 piece get_piece(piece board[8][8], coords coords)
 {
+    if (is_empty_coords(coords))
+    {
+        return empty_piece();
+    }
     piece piece;
     piece.name = board[coords.x][coords.y].name;
     piece.color = board[coords.x][coords.y].color;

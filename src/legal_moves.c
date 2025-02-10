@@ -30,14 +30,14 @@ bool can_move_pawn(board_state *board_s, piece selected_piece, coords init_co, c
             return true;
         }
         // check for en passant
-        else if (init_co.x == 5 && newx == init_co.x + 1 && abs(newy - init_co.y) == 1 && board_s->black_pawn_passant == newy)
+        else if (init_co.x == 4 && newx == init_co.x + 1 && abs(newy - init_co.y) == 1 && board_s->black_pawn_passant == newy)
         {
             return true;
         }
     }
     else
     {
-        if (newx == init_co.x - 1 && newy == init_co.y)
+        if (newx == init_co.x - 1 && newy == init_co.y && is_empty(board[newx][newy]))
         {
             return true;
         }
@@ -45,11 +45,11 @@ bool can_move_pawn(board_state *board_s, piece selected_piece, coords init_co, c
         {
             return true;
         }
-        else if (init_co.x == 6 && newx == 4 && newy == init_co.y && board[5][newy].name == ' ')
+        else if (init_co.x == 6 && newx == 4 && newy == init_co.y && board[5][newy].name == ' ' && is_empty(board[newx][newy]))
         {
             return true;
         }
-        else if (init_co.x == 4 && newx == init_co.x - 1 && abs(newy - init_co.y) == 1 && board_s->white_pawn_passant == newy)
+        else if (init_co.x == 3 && newx == init_co.x - 1 && abs(newy - init_co.y) == 1 && board_s->white_pawn_passant == newy)
         {
             return true;
         }
