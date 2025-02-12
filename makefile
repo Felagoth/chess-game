@@ -43,5 +43,9 @@ clean:
 distclean: clean
 	rmdir $(OBJ_DIR) $(BUILD_DIR)
 
+# Define the debug target
+debug: CFLAGS += -g
+debug: $(EXECUTABLE)
+
 # Phony targets to avoid conflicts with files of the same name
-.PHONY: all clean distclean
+.PHONY: all clean distclean debug

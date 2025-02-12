@@ -150,11 +150,11 @@ void draw_board()
                 // set widget color to the original color
                 if ((i + j) % 2 == 0)
                 {
-                    gtk_widget_set_name(board_widgets[7 - i][j], "lightbrown");
+                    gtk_widget_set_name(board_widgets[7 - i][j], "darkbrown");
                 }
                 else
                 {
-                    gtk_widget_set_name(board_widgets[7 - i][j], "darkbrown");
+                    gtk_widget_set_name(board_widgets[7 - i][j], "lightbrown");
                 }
             }
         }
@@ -228,7 +228,7 @@ void on_square_clicked(GtkGestureClick *gesture, GtkButton *event, GtkWidget *ev
     else
     {
         mate = is_mate(board_s, color2);
-        if ((mate && !is_check(board_s, color)) || board_s->fifty_move_rule > 49 || threefold_repetition(board_s, pos_l, 0))
+        if ((mate && !is_check(board_s, color) && mode >= 3) || board_s->fifty_move_rule > 49 || threefold_repetition(board_s, pos_l, 0))
         {
             display_draw(window);
         }
@@ -294,11 +294,11 @@ void init_chess_window(GtkApplication *app, GtkWidget *window)
             // set square color
             if ((i + j) % 2 == 0)
             {
-                gtk_widget_set_name(board_widgets[i][j], "lightbrown");
+                gtk_widget_set_name(board_widgets[i][j], "darkbrown");
             }
             else
             {
-                gtk_widget_set_name(board_widgets[i][j], "darkbrown");
+                gtk_widget_set_name(board_widgets[i][j], "lightbrown");
             }
             g_signal_connect(gesture, "pressed", G_CALLBACK(on_square_clicked), eventbox);
         }
