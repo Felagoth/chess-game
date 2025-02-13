@@ -239,6 +239,18 @@ void on_square_clicked(GtkGestureClick *gesture, GtkButton *event, GtkWidget *ev
     }
 }
 
+free_pos_list(position_list *pos_l)
+{
+    position_list *current = pos_l;
+    position_list *next;
+    while (current != NULL)
+    {
+        next = current->tail;
+        free(current);
+        current = next;
+    }
+}
+
 void init_chess_window(GtkApplication *app, GtkWidget *window)
 {
     GtkWidget *eventbox, *menu_button;
@@ -322,9 +334,13 @@ void init_chess_window(GtkApplication *app, GtkWidget *window)
     // Connect the button to the callback function
     g_signal_connect(menu_button, "clicked", G_CALLBACK(to_menugtk), window);
 
-    // Init the chess board state
+    // Init the chess board state and positions list
+    free(board_s);
     board_s = init_board();
     init_co = empty_coords();
+    free_pos_list(pos_l);
+    pos_l = NULL;
+    pos_l = save_position(board_s, pos_l);
     draw_board(init_co);
     if (mode < 3)
     {
