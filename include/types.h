@@ -3,27 +3,27 @@
 
 #include <stdbool.h>
 
-typedef struct piece
+typedef struct
 {
     char name;  // name of the piece
     char color; // color of the piece ('w' for white, 'b' for black, ' ' for empty)
-} piece;
+} Piece;
 
-typedef struct coords
+typedef struct
 {
     int x;
     int y;
-} coords;
+} Coords;
 
-typedef struct move
+typedef struct
 {
-    coords init_co;
-    coords dest_co;
-} move;
+    Coords init_co;
+    Coords dest_co;
+} Move;
 
-typedef struct board_state
+typedef struct
 {
-    piece board[8][8];
+    Piece board[8][8];
     bool white_kingside_castlable; // true if white can castle
     bool white_queenside_castlable;
     bool black_kingside_castlable;
@@ -32,12 +32,12 @@ typedef struct board_state
     int black_pawn_passant; // -1 if no pawn can be taken en passant, otherwise the column of the pawn
     int white_pawn_passant;
     int fifty_move_rule;
-} board_state;
+} BoardState;
 
 typedef struct position_list
 {
-    board_state *board_s;
+    BoardState *board_s;
     struct position_list *tail;
-} position_list;
+} PositionList;
 
 #endif

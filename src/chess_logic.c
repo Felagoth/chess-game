@@ -7,64 +7,64 @@
 #include "chess_logic.h"
 #include "gtkgame.h"
 
-piece empty_piece()
+Piece empty_piece()
 {
-    piece piece;
+    Piece piece;
     piece.name = ' ';
     piece.color = ' ';
     return piece;
 }
 
-coords empty_coords()
+Coords empty_coords()
 {
-    coords coords;
+    Coords coords;
     coords.x = -1;
     coords.y = -1;
     return coords;
 }
 
-move empty_move()
+Move empty_move()
 {
-    move move;
+    Move move;
     move.init_co = empty_coords();
     move.dest_co = empty_coords();
     return move;
 }
 
-bool is_empty(piece piece)
+bool is_empty(Piece piece)
 {
     return piece.name == ' ' && piece.color == ' ';
 }
 
-bool is_empty_coords(coords coords)
+bool is_empty_coords(Coords coords)
 {
     return coords.x == -1 && coords.y == -1;
 }
 
-bool is_empty_move(move move)
+bool is_empty_move(Move move)
 {
     return is_empty_coords(move.init_co) && is_empty_coords(move.dest_co);
 }
 
-bool are_same_piece(piece piece1, piece piece2)
+bool are_same_piece(Piece piece1, Piece piece2)
 {
     return piece1.name == piece2.name && piece1.color == piece2.color;
 }
 
-position_list *empty_list()
+PositionList *empty_list()
 {
     return NULL;
 }
 
-position_list *save_position(board_state *board_s, position_list *pos_l)
+PositionList *save_position(BoardState *board_s, PositionList *pos_l)
 {
-    board_state *board_s_copy = malloc(sizeof(board_state));
+    BoardState *board_s_copy = malloc(sizeof(BoardState));
     if (board_s_copy == NULL)
     {
         return NULL;
     }
     *board_s_copy = *board_s;
-    position_list *new_list = malloc(sizeof(position_list));
+    PositionList *new_list = malloc(sizeof(PositionList));
     if (new_list == NULL)
     {
         return NULL;
@@ -74,10 +74,10 @@ position_list *save_position(board_state *board_s, position_list *pos_l)
     return new_list;
 }
 
-bool are_same_pos(board_state *board_s1, board_state *board_s2)
+bool are_same_pos(BoardState *board_s1, BoardState *board_s2)
 {
-    piece(*board1)[8] = board_s1->board;
-    piece(*board2)[8] = board_s2->board;
+    Piece(*board1)[8] = board_s1->board;
+    Piece(*board2)[8] = board_s2->board;
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
@@ -95,7 +95,7 @@ bool are_same_pos(board_state *board_s1, board_state *board_s2)
     // clang-format on
 }
 
-bool threefold_repetition(board_state *board_s, position_list *pos_l, int number_of_repetitions)
+bool threefold_repetition(BoardState *board_s, PositionList *pos_l, int number_of_repetitions)
 {
     if (pos_l == NULL)
     {
@@ -116,7 +116,7 @@ bool threefold_repetition(board_state *board_s, position_list *pos_l, int number
     }
 }
 
-piece get_piece(piece board[8][8], coords coords)
+Piece get_piece(Piece board[8][8], Coords coords)
 {
     if (is_empty_coords(coords))
     {
@@ -125,7 +125,7 @@ piece get_piece(piece board[8][8], coords coords)
     return board[coords.x][coords.y];
 }
 
-bool can_move_heuristic(board_state *board_s, piece piece, coords init_co, coords new_co, bool check_would_stop)
+bool can_move_heuristic(BoardState *board_s, Piece piece, Coords init_co, Coords new_co, bool check_would_stop)
 {
     int i = new_co.x;
     int j = new_co.y;
@@ -141,17 +141,17 @@ bool can_move_heuristic(board_state *board_s, piece piece, coords init_co, coord
     // clang-format on
 }
 
-bool is_attacked(board_state *board_s, coords co, char color, bool check_would_stop)
+bool is_attacked(BoardState *board_s, Coords co, char color, bool check_would_stop)
 {
-    piece(*board)[8] = board_s->board;
+    Piece(*board)[8] = board_s->board;
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
         {
-            piece piece = board[i][j];
+            Piece piece = board[i][j];
             if (piece.color != color)
             {
-                coords piece_coords;
+                Coords piece_coords;
                 piece_coords.x = i;
                 piece_coords.y = j;
                 if (can_move_heuristic(board_s, piece, piece_coords, co, check_would_stop))
@@ -164,7 +164,7 @@ bool is_attacked(board_state *board_s, coords co, char color, bool check_would_s
     return false;
 }
 
-board_state *move_pawn_handling(board_state *board_s, piece move_piece, piece dest_piece, coords init_coords, coords new_coords)
+BoardState *move_pawn_handling(BoardState *board_s, Piece move_piece, Piece dest_piece, Coords init_coords, Coords new_coords)
 {
     // printf("move_pawn_handling: color: %c, init_coords: (%d, %d), new_coords: (%d, %d)\n", move_piece.color, init_coords.x, init_coords.y, new_coords.x, new_coords.y);
     // printf("dest_piece: %c, %c\n", dest_piece.name, dest_piece.color);
@@ -195,7 +195,7 @@ board_state *move_pawn_handling(board_state *board_s, piece move_piece, piece de
     return board_s;
 }
 
-board_state *move_king_handling(board_state *board_s, piece piece, coords init_coords, coords new_coords)
+BoardState *move_king_handling(BoardState *board_s, Piece piece, Coords init_coords, Coords new_coords)
 {
     if (piece.color == 'w')
     {
@@ -222,7 +222,7 @@ board_state *move_king_handling(board_state *board_s, piece piece, coords init_c
     return board_s;
 }
 
-board_state *move_rook_handling(board_state *board_s, piece piece, coords init_coords, coords new_coords)
+BoardState *move_rook_handling(BoardState *board_s, Piece piece, Coords init_coords, Coords new_coords)
 {
     if (piece.color == 'w' && init_coords.x == 0 && init_coords.y == 0)
     {
@@ -243,10 +243,10 @@ board_state *move_rook_handling(board_state *board_s, piece piece, coords init_c
     return board_s;
 }
 
-board_state *move_piece(board_state *board_s, coords init_coords, coords new_coords)
+BoardState *move_piece(BoardState *board_s, Coords init_coords, Coords new_coords)
 {
-    piece move_piece = get_piece(board_s->board, init_coords);
-    piece dest_piece = get_piece(board_s->board, new_coords);
+    Piece move_piece = get_piece(board_s->board, init_coords);
+    Piece dest_piece = get_piece(board_s->board, new_coords);
     board_s->white_pawn_passant = -1;
     board_s->black_pawn_passant = -1;
     board_s->board[new_coords.x][new_coords.y].name = move_piece.name;
@@ -276,9 +276,9 @@ board_state *move_piece(board_state *board_s, coords init_coords, coords new_coo
     return board_s;
 }
 
-board_state *move_piece_forced(board_state *board_s, coords init_coords, coords new_coords)
+BoardState *move_piece_forced(BoardState *board_s, Coords init_coords, Coords new_coords)
 {
-    piece move_piece = get_piece(board_s->board, init_coords);
+    Piece move_piece = get_piece(board_s->board, init_coords);
     //  castling
     if (new_coords.y == 6 && init_coords.y == 4)
     {
@@ -311,15 +311,15 @@ board_state *move_piece_forced(board_state *board_s, coords init_coords, coords 
     return board_s;
 }
 
-coords find_king(board_state *board_s, char color)
+Coords find_king(BoardState *board_s, char color)
 {
-    piece(*board)[8] = board_s->board;
-    coords king_coords = empty_coords();
+    Piece(*board)[8] = board_s->board;
+    Coords king_coords = empty_coords();
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
         {
-            piece piece = board[i][j];
+            Piece piece = board[i][j];
             if (piece.name == 'K' && piece.color == color)
             {
                 king_coords.x = i;
@@ -331,18 +331,18 @@ coords find_king(board_state *board_s, char color)
     return king_coords;
 }
 
-bool is_check(board_state *board_s, char color)
+bool is_check(BoardState *board_s, char color)
 {
-    coords king_coords = find_king(board_s, color);
+    Coords king_coords = find_king(board_s, color);
     return is_attacked(board_s, king_coords, color, false);
 }
 
-bool is_mate(board_state *board_s, char color)
+bool is_mate(BoardState *board_s, char color)
 {
-    piece(*board)[8] = board_s->board;
-    coords init_coords;
-    coords new_coords;
-    piece piece;
+    Piece(*board)[8] = board_s->board;
+    Coords init_coords;
+    Coords new_coords;
+    Piece piece;
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
@@ -370,7 +370,7 @@ bool is_mate(board_state *board_s, char color)
     return true;
 }
 
-bool is_checkmate(board_state *board_s, char color)
+bool is_checkmate(BoardState *board_s, char color)
 {
     if (!is_check(board_s, color))
     {
@@ -379,7 +379,7 @@ bool is_checkmate(board_state *board_s, char color)
     return is_mate(board_s, color);
 }
 
-bool is_stalemate(board_state *board_s, char color)
+bool is_stalemate(BoardState *board_s, char color)
 {
     if (is_check(board_s, color))
     {
@@ -388,9 +388,9 @@ bool is_stalemate(board_state *board_s, char color)
     return is_mate(board_s, color);
 }
 
-board_state *init_board()
+BoardState *init_board()
 {
-    board_state *board_s = malloc(sizeof(board_state));
+    BoardState *board_s = malloc(sizeof(BoardState));
     if (board_s == NULL)
     {
         return NULL;
@@ -434,7 +434,7 @@ board_state *init_board()
     return board_s;
 }
 
-bool can_move(board_state *board_s, piece piece, coords init_co, coords new_co, bool check_would_stop)
+bool can_move(BoardState *board_s, Piece piece, Coords init_co, Coords new_co, bool check_would_stop)
 {
     // pre-checks to see if the move is valid
     if (new_co.x < 0 || new_co.x >= 8 || new_co.y < 0 || new_co.y >= 8)
@@ -447,7 +447,7 @@ bool can_move(board_state *board_s, piece piece, coords init_co, coords new_co, 
     }
     if (check_would_stop)
     {
-        board_state *new_board_s = malloc(sizeof(board_state));
+        BoardState *new_board_s = malloc(sizeof(BoardState));
         if (new_board_s == NULL)
         {
             return false;
