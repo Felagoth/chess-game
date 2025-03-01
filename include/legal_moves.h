@@ -4,11 +4,11 @@
 #include <stdbool.h>
 #include "types.h"
 
-bool can_move_pawn(board_state *board_s, piece selected_piece, coords init_co, coords dest_co);
-bool can_move_knight(board_state *board_s, piece selected_piece, coords init_co, coords dest_co);
-bool can_move_rook(board_state *board_s, piece selected_piece, coords init_co, coords dest_co);
-bool can_move_bishop(board_state *board_s, piece selected_piece, coords init_co, coords dest_co);
-bool can_move_queen(board_state *board_s, piece selected_piece, coords init_co, coords dest_co);
-bool can_move_king(board_state *board_s, piece selected_piece, coords init_co, coords dest_co);
+bool can_move_pawn(BoardState *board_s, Piece selected_piece, Coords init_co, Coords dest_co);
+bool can_move_knight(BoardState *board_s, Coords init_co, Coords dest_co);
+bool can_move_rook(BoardState *board_s, Coords init_co, Coords dest_co);
+bool can_move_bishop(BoardState *board_s, Coords init_co, Coords dest_co);
+bool can_move_queen(BoardState *board_s, Coords init_co, Coords dest_co);
+bool can_move_king(BoardState *board_s, Piece selected_piece, Coords init_co, Coords dest_co);
 
 #endif

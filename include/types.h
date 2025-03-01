@@ -19,6 +19,7 @@ typedef struct
 {
     Coords init_co;
     Coords dest_co;
+    char promotion;
 } Move;
 
 typedef struct
@@ -34,10 +35,10 @@ typedef struct
     int fifty_move_rule;
 } BoardState;
 
-typedef struct position_list
+typedef struct PositionList
 {
     BoardState *board_s;
-    struct position_list *tail;
+    struct PositionList *tail;
 } PositionList;
 
 #endif

@@ -12,7 +12,7 @@ void pva(GtkApplication *app);
 void semi_free(GtkApplication *app, GtkWidget *window);
 void free_mode(GtkApplication *app, GtkWidget *window);
 void settings(GtkApplication *app);
-char prompt_promotion(board_state *board_state, piece move_piece, coords init_coords, coords new_coords);
+char prompt_promotion(BoardState *board_state, Piece move_piece, Coords init_coords, Coords new_coords);
 void display_draw(GtkWidget *window);
 void display_victory(char color, GtkWidget *window);
 

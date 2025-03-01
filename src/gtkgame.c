@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <gtk/gtk.h>
@@ -7,12 +6,12 @@
 #include "gtkgame.h"
 #include "chess_logic.h"
 
-static board_state *board_s;
-static position_list *pos_l = NULL;
+static BoardState *board_s;
+static PositionList *pos_l = NULL;
 static int mode;
 static char color;
 static bool is_selected = false;
-static coords init_co;
+static Coords init_co;
 GtkWidget *board_widgets[8][8];
 
 void on_activate(GtkApplication *app)
@@ -65,7 +64,7 @@ void menugtk(GtkApplication *app, GtkWidget *window)
     gtk_widget_show(window);
 }
 
-char *get_label_piece(piece p)
+char *get_label_piece(Piece p)
 {
     if (p.color == 'w')
     {
@@ -124,9 +123,9 @@ char *get_label_piece(piece p)
 
 void draw_board()
 {
-    piece selected_piece = get_piece(board_s->board, init_co);
+    Piece selected_piece = get_piece(board_s->board, init_co);
     char *label_piece;
-    coords dest_co;
+    Coords dest_co;
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
@@ -173,14 +172,18 @@ void on_square_clicked(GtkGestureClick *gesture, GtkButton *event, GtkWidget *ev
     row = top;
     column = left - 1;
     // printf("clicked on square %c%d\n", 'a' + column, 8 - row);
-    coords co;
+    Coords co;
     co.x = 7 - row;
     co.y = column;
     if (is_selected)
     {
         if (can_move(board_s, board_s->board[init_co.x][init_co.y], init_co, co, true) || mode == 4)
         {
-            board_s = move_piece(board_s, init_co, co);
+            Move move;
+            move.init_co = init_co;
+            move.dest_co = co;
+            move.promotion = ' ';
+            board_s = move_piece(board_s, move);
             is_selected = false;
             pos_l = save_position(board_s, pos_l);
             if (mode < 3)
@@ -236,18 +239,6 @@ void on_square_clicked(GtkGestureClick *gesture, GtkButton *event, GtkWidget *ev
         {
             display_victory(color, window);
         }
-    }
-}
-
-free_pos_list(position_list *pos_l)
-{
-    position_list *current = pos_l;
-    position_list *next;
-    while (current != NULL)
-    {
-        next = current->tail;
-        free(current);
-        current = next;
     }
 }
 
@@ -338,7 +329,7 @@ void init_chess_window(GtkApplication *app, GtkWidget *window)
     free(board_s);
     board_s = init_board();
     init_co = empty_coords();
-    free_pos_list(pos_l);
+    free_position_list(pos_l);
     pos_l = NULL;
     pos_l = save_position(board_s, pos_l);
     draw_board(init_co);
@@ -432,7 +423,7 @@ void on_promotion_button_clicked(GtkButton *button, gpointer data)
     }
 }
 
-char prompt_promotion(board_state *board_state, piece move_piece, coords init_coords, coords new_coords)
+char prompt_promotion(BoardState *board_state, Piece move_piece, Coords init_coords, Coords new_coords)
 {
     // Create a new window
     GtkWidget *promotion_window = gtk_window_new();

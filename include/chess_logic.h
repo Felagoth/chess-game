@@ -6,31 +6,39 @@
 #include "types.h"
 #include "legal_moves.h"
 
-board_state *init_board();
+BoardState *init_board();
 
-piece empty_piece();
-coords empty_coords();
-move empty_move();
-bool is_empty(piece piece);
-bool is_empty_coords(coords coords);
-bool is_empty_move(move move);
-position_list *empty_list();
-position_list *save_position(board_state *board_s, position_list *pos_l);
-bool are_same_pos(board_state *board_s1, board_state *board_s2);
-bool threefold_repetition(board_state *board_s, position_list *pos_l, int number_of_repetitions);
-piece get_piece(piece board[8][8], coords coords);
-bool can_move_heuristic(board_state *board_s, piece piece, coords init_co, coords new_co, bool check_would_stop);
-bool is_attacked(board_state *board_s, coords co, char color, bool check_would_stop);
-bool is_check(board_state *board_s, char color);
-bool is_mate(board_state *board_s, char color);
-bool is_checkmate(board_state *board_s, char color);
-bool is_stalemate(board_state *board_s, char color);
+// basic functions
+Piece empty_piece();
+Coords empty_coords();
+Move empty_move();
+bool is_empty(Piece piece);
+bool is_empty_coords(Coords coords);
+bool is_empty_move(Move move);
+PositionList *empty_list();
+void free_position_list(PositionList *pos_l);
+PositionList *save_position(BoardState *board_s, PositionList *pos_l);
 
-board_state *move_pawn_handling(board_state *board_s, piece move_piece, piece dest_piece, coords init_coords, coords new_coords);
-board_state *move_king_handling(board_state *board_s, piece move_piece, coords init_coords, coords new_coords);
-board_state *move_rook_handling(board_state *board_s, piece move_piece, coords init_coords, coords new_coords);
-board_state *move_piece(board_state *board_s, coords init_coords, coords new_coords);
+// draws
+bool are_same_pos(BoardState *board_s1, BoardState *board_s2);
+bool threefold_repetition(BoardState *board_s, PositionList *pos_l, int number_of_repetitions);
+bool insufficient_material(BoardState *board_s);
 
-bool can_move(board_state *board_s, piece piece, coords init_co, coords new_co, bool check_would_stop);
+// moves
+Piece get_piece(Piece board[8][8], Coords coords);
+bool can_move_heuristic(BoardState *board_s, Piece piece, Coords init_co, Coords new_co, bool check_would_stop);
+bool is_attacked(BoardState *board_s, Coords co, char color, bool check_would_stop);
+bool is_check(BoardState *board_s, char color);
+bool is_mate(BoardState *board_s, char color);
+bool is_checkmate(BoardState *board_s, char color);
+bool is_stalemate(BoardState *board_s, char color);
+
+// move handling
+BoardState *move_pawn_handling(BoardState *board_s, Piece move_piece, Piece dest_piece, Move selected_move);
+BoardState *move_king_handling(BoardState *board_s, Piece move_piece, Coords init_coords, Coords new_coords);
+BoardState *move_rook_handling(BoardState *board_s, Piece move_piece, Coords init_coords, Coords new_coords);
+BoardState *move_piece(BoardState *board_s, Move selected_move);
+
+bool can_move(BoardState *board_s, Piece piece, Coords init_co, Coords new_co, bool check_would_stop);
 
 #endif

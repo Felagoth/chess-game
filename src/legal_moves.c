@@ -6,10 +6,10 @@
 
 #include <stdio.h>
 
-bool can_move_pawn(board_state *board_s, piece selected_piece, coords init_co, coords dest_co)
+bool can_move_pawn(BoardState *board_s, Piece selected_piece, Coords init_co, Coords dest_co)
 {
     // printf("cmp: piece is %c %c\n", selected_piece.name, selected_piece.color);
-    piece(*board)[8] = board_s->board;
+    Piece(*board)[8] = board_s->board;
     int newx = dest_co.x;
     int newy = dest_co.y;
     if (selected_piece.color == 'w')
@@ -57,9 +57,9 @@ bool can_move_pawn(board_state *board_s, piece selected_piece, coords init_co, c
     return false;
 }
 
-bool can_move_rook(board_state *board_s, piece selected_piece, coords init_co, coords dest_co)
+bool can_move_rook(BoardState *board_s, Coords init_co, Coords dest_co)
 {
-    piece(*board)[8] = board_s->board;
+    Piece(*board)[8] = board_s->board;
     int newx = dest_co.x;
     int newy = dest_co.y;
     if (newx == init_co.x)
@@ -113,7 +113,7 @@ bool can_move_rook(board_state *board_s, piece selected_piece, coords init_co, c
     return false;
 }
 
-bool can_move_knight(board_state *board_s, piece selected_piece, coords init_co, coords dest_co)
+bool can_move_knight(BoardState *board_s, Coords init_co, Coords dest_co)
 {
     int newx = dest_co.x;
     int newy = dest_co.y;
@@ -130,11 +130,11 @@ bool can_move_knight(board_state *board_s, piece selected_piece, coords init_co,
     }
     return false;
 }
-bool can_move_bishop(board_state *board_s, piece selected_piece, coords init_co, coords dest_co)
+bool can_move_bishop(BoardState *board_s, Coords init_co, Coords dest_co)
 {
     int newx = dest_co.x;
     int newy = dest_co.y;
-    piece(*board)[8] = board_s->board;
+    Piece(*board)[8] = board_s->board;
     if (newx - init_co.x == newy - init_co.y)
     {
         if (newx > init_co.x)
@@ -186,12 +186,12 @@ bool can_move_bishop(board_state *board_s, piece selected_piece, coords init_co,
     return false;
 }
 
-bool can_move_queen(board_state *board_s, piece selected_piece, coords init_co, coords dest_co)
+bool can_move_queen(BoardState *board_s, Coords init_co, Coords dest_co)
 {
-    return can_move_rook(board_s, selected_piece, init_co, dest_co) || can_move_bishop(board_s, selected_piece, init_co, dest_co);
+    return can_move_rook(board_s, init_co, dest_co) || can_move_bishop(board_s, init_co, dest_co);
 }
 
-bool can_move_king(board_state *board_s, piece selected_piece, coords init_co, coords dest_co)
+bool can_move_king(BoardState *board_s, Piece selected_piece, Coords init_co, Coords dest_co)
 {
     int newx = dest_co.x;
     int newy = dest_co.y;
