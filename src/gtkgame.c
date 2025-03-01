@@ -180,12 +180,17 @@ void engine_play()
     {
         // Do nothing, just iterate
     }
+    if (pos_l == NULL)
+    {
+        display_victory((color == 'w') ? 'b' : 'w', gtk_widget_get_ancestor(board_widgets[0][0], GTK_TYPE_WINDOW));
+        stop_engine(sub_process);
+    }
     pos_l = play_turn(sub_process.write_pipe, sub_process.read_pipe, moves_history, pos_l, 1000, 1000);
     *board_s = *pos_l->board_s;
     color = (color == 'w') ? 'b' : 'w';
     if (check_end(pos_l, color) == 1)
     {
-        display_victory(color, gtk_widget_get_ancestor(board_widgets[0][0], GTK_TYPE_WINDOW));
+        display_victory((color == 'w') ? 'b' : 'w', gtk_widget_get_ancestor(board_widgets[0][0], GTK_TYPE_WINDOW));
         stop_engine(sub_process);
     }
     else if (check_end(pos_l, color) == 0)
