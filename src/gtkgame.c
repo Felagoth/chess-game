@@ -5,6 +5,8 @@
 #include "types.h"
 #include "gtkgame.h"
 #include "chess_logic.h"
+#include "communication.h"
+#include "uci_handling.h"
 
 static BoardState *board_s;
 static PositionList *pos_l = NULL;
@@ -13,6 +15,10 @@ static char color;
 static bool is_selected = false;
 static Coords init_co;
 GtkWidget *board_widgets[8][8];
+
+SubProcess sub_process;
+char engine_color;
+char moves_history[32000];
 
 void on_activate(GtkApplication *app)
 {
@@ -56,7 +62,7 @@ void menugtk(GtkApplication *app, GtkWidget *window)
     gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
     // Connect the buttons to the callback functions
     g_signal_connect(pvp_button, "clicked", G_CALLBACK(pvp), window);
-    g_signal_connect(pva_button, "clicked", G_CALLBACK(pva), NULL);
+    g_signal_connect(pva_button, "clicked", G_CALLBACK(pva), window);
     g_signal_connect(semi_free_button, "clicked", G_CALLBACK(semi_free), window);
     g_signal_connect(free_mode_button, "clicked", G_CALLBACK(free_mode), window);
     g_signal_connect(settings_button, "clicked", G_CALLBACK(settings), NULL);
@@ -136,8 +142,15 @@ void draw_board()
             gtk_label_set_text(GTK_LABEL(gtk_widget_get_first_child(GTK_WIDGET(board_widgets[7 - i][j]))), label_piece);
             if (can_move_heuristic(board_s, selected_piece, init_co, dest_co, true))
             {
-                // set widget color to yellow
-                gtk_widget_set_name(board_widgets[7 - i][j], "yellow");
+                // set widget color to light/dark green
+                if ((i + j) % 2 == 0)
+                {
+                    gtk_widget_set_name(board_widgets[7 - i][j], "darkgreen");
+                }
+                else
+                {
+                    gtk_widget_set_name(board_widgets[7 - i][j], "lightgreen");
+                }
             }
             else if (init_co.x == i && init_co.y == j && is_selected && !is_empty_coords(init_co))
             {
@@ -158,6 +171,30 @@ void draw_board()
             }
         }
     }
+}
+
+void engine_play()
+{
+    // wait that the draw_board function is finished
+    while (g_main_context_iteration(NULL, FALSE))
+    {
+        // Do nothing, just iterate
+    }
+    pos_l = play_turn(sub_process.write_pipe, sub_process.read_pipe, moves_history, pos_l, 1000, 1000);
+    *board_s = *pos_l->board_s;
+    color = (color == 'w') ? 'b' : 'w';
+    if (check_end(pos_l, color) == 1)
+    {
+        display_victory(color, gtk_widget_get_ancestor(board_widgets[0][0], GTK_TYPE_WINDOW));
+        stop_engine(sub_process);
+    }
+    else if (check_end(pos_l, color) == 0)
+    {
+        display_draw(gtk_widget_get_ancestor(board_widgets[0][0], GTK_TYPE_WINDOW));
+        stop_engine(sub_process);
+    }
+    init_co = empty_coords();
+    draw_board();
 }
 
 // on_square_clicked function that returns the column and line of the clicked square
@@ -186,6 +223,7 @@ void on_square_clicked(GtkGestureClick *gesture, GtkButton *event, GtkWidget *ev
             board_s = move_piece(board_s, move);
             is_selected = false;
             pos_l = save_position(board_s, pos_l);
+            concatenate_moves(moves_history, move);
             if (mode < 3)
             {
                 color = (color == 'w') ? 'b' : 'w';
@@ -219,14 +257,33 @@ void on_square_clicked(GtkGestureClick *gesture, GtkButton *event, GtkWidget *ev
     char color1 = (color == 'w' || color == ' ') ? 'w' : 'b';
     char color2 = (color1 == 'w') ? 'b' : 'w';
     bool mate = is_mate(board_s, color1);
-    if ((mate && !is_check(board_s, color1)) || board_s->fifty_move_rule > 49 || threefold_repetition(board_s, pos_l, 0))
+    if ((mate && !is_check(board_s, color1)) || board_s->fifty_move_rule >= 100 || threefold_repetition(board_s, pos_l, 0) || insufficient_material(board_s))
     {
         // printf("mate: %d, check: %d, fifty: %d, threefold: %d\n", mate, is_check(board_s, color), board_s->fifty_move_rule, threefold_repetition(board_s, pos_l, 0));
+        if (insufficient_material(board_s))
+        {
+            printf("insufficient material\n");
+        }
+        else if (mate)
+        {
+            printf("mate\n");
+        }
+        else if (board_s->fifty_move_rule >= 100)
+        {
+            printf("fifty move rule\n");
+        }
+        else
+        {
+            print_position_list(pos_l);
+            printf("threefold repetition\n");
+        }
         display_draw(window);
+        stop_engine(sub_process);
     }
     else if (is_check(board_s, color1) && mate)
     {
         display_victory(color2, window);
+        stop_engine(sub_process);
     }
     else
     {
@@ -234,11 +291,17 @@ void on_square_clicked(GtkGestureClick *gesture, GtkButton *event, GtkWidget *ev
         if ((mate && !is_check(board_s, color) && mode >= 3) || board_s->fifty_move_rule > 49 || threefold_repetition(board_s, pos_l, 0))
         {
             display_draw(window);
+            stop_engine(sub_process);
         }
         else if (is_check(board_s, color2) && mate)
         {
             display_victory(color, window);
+            stop_engine(sub_process);
         }
+    }
+    if (mode == 2 && color == engine_color)
+    {
+        engine_play();
     }
 }
 
@@ -332,15 +395,9 @@ void init_chess_window(GtkApplication *app, GtkWidget *window)
     free_position_list(pos_l);
     pos_l = NULL;
     pos_l = save_position(board_s, pos_l);
+    moves_history[0] = '\0';
+    // Draw the board
     draw_board(init_co);
-    if (mode < 3)
-    {
-        color = 'w';
-    }
-    else
-    {
-        color = ' ';
-    }
     // Show the window
     gtk_widget_show(window);
 }
@@ -359,23 +416,37 @@ void start()
 void pvp(GtkApplication *app, GtkWidget *window)
 {
     mode = 1;
+    color = 'w';
+    engine_color = ' ';
+    sub_process = empty_process();
     init_chess_window(app, window);
 }
 
-void pva(GtkApplication *app)
+void pva(GtkApplication *app, GtkWidget *window)
 {
-    printf("pva available soon\n");
+    mode = 2;
+    color = 'w';
+    engine_color = 'b';
+    sub_process = gen_process();
+    start_engine(sub_process);
+    init_chess_window(app, window);
 }
 
 void semi_free(GtkApplication *app, GtkWidget *window)
 {
     mode = 3;
+    color = ' ';
+    engine_color = ' ';
+    sub_process = empty_process();
     init_chess_window(app, window);
 }
 
 void free_mode(GtkApplication *app, GtkWidget *window)
 {
     mode = 4;
+    color = ' ';
+    engine_color = ' ';
+    sub_process = empty_process();
     init_chess_window(app, window);
 }
 

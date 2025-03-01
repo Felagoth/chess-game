@@ -41,4 +41,11 @@ typedef struct PositionList
     struct PositionList *tail;
 } PositionList;
 
+typedef struct
+{
+    int write_pipe[2];
+    int read_pipe[2];
+    pid_t pid;
+} SubProcess;
+
 #endif

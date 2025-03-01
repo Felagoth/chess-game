@@ -222,6 +222,55 @@ bool is_attacked(BoardState *board_s, Coords co, char color, bool check_would_st
     return false;
 }
 
+// return 1 for victory, 0 for draw, -1 for no end
+int check_end(PositionList *pos_l, char color)
+{
+    if (color == ' ')
+    {
+        int end = check_end(pos_l, 'w');
+        if (end == -1)
+        {
+            end = check_end(pos_l, 'b');
+        }
+        return end;
+    }
+    if (pos_l == NULL)
+    {
+        fprintf(stdout, "No moves given (this shouldn't be possinle)\n");
+        return 0;
+    }
+    BoardState *board_s = pos_l->board_s;
+    if (is_mate(board_s, color))
+    {
+        if (is_check(board_s, color))
+        {
+            fprintf(stdout, "Checkmate\n");
+            return 1;
+        }
+        else
+        {
+            fprintf(stdout, "Stalemate\n");
+            return 0;
+        }
+    }
+    else if (threefold_repetition(board_s, pos_l, 0))
+    {
+        fprintf(stdout, "Threefold repetition\n");
+        return 0;
+    }
+    else if (board_s->fifty_move_rule >= 100)
+    {
+        fprintf(stdout, "Fifty-move rule\n");
+        return 0;
+    }
+    else if (insufficient_material(board_s))
+    {
+        fprintf(stdout, "Insufficient material\n");
+        return 0;
+    }
+    return -1;
+}
+
 BoardState *move_pawn_handling(BoardState *board_s, Piece move_piece, Piece dest_piece, Move sel_move)
 {
     Coords new_coords = sel_move.dest_co;
@@ -571,5 +620,44 @@ bool can_move(BoardState *board_s, Piece piece, Coords init_co, Coords new_co, b
         return can_move_king(board_s, piece, init_co, new_co);
     default:
         return false;
+    }
+}
+
+void print_board(BoardState *board_s)
+{
+    Piece(*board)[8] = board_s->board;
+    for (int i = 7; i >= 0; i--)
+    {
+        fprintf(stderr, "%d ", i);
+        for (int j = 0; j < 8; j++)
+        {
+            if (board[i][j].color == 'w')
+            {
+                fprintf(stderr, "%c ", board[i][j].name);
+            }
+            else if (board[i][j].color == 'b')
+            {
+                fprintf(stderr, "%c ", board[i][j].name + 32);
+            }
+            else
+            {
+                fprintf(stderr, "  ");
+            }
+        }
+        fprintf(stderr, "\n");
+    }
+    fprintf(stderr, "  a b c d e f g h\n");
+}
+
+void print_position_list(PositionList *pos_l)
+{
+    PositionList *current = pos_l;
+    int i = 0;
+    while (current != NULL)
+    {
+        fprintf(stderr, "Position %d\n", i);
+        print_board(current->board_s);
+        current = current->tail;
+        i++;
     }
 }

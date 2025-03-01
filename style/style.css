@@ -16,6 +16,18 @@
     font-size: 26px;
 }
 
+#lightgreen {
+    background: #e7f7d4;
+    font-family: Serif;
+    font-size: 26px;
+}
+
+#darkgreen {
+    background: #daefbc;
+    font-family: Serif;
+    font-size: 26px;
+}
+
 #blue {
     background: #b7d4f7;
     font-family: Serif;

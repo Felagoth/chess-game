@@ -8,7 +8,7 @@
 void start();
 void menugtk(GtkApplication *app, GtkWidget *window);
 void pvp(GtkApplication *app, GtkWidget *window);
-void pva(GtkApplication *app);
+void pva(GtkApplication *app, GtkWidget *window);
 void semi_free(GtkApplication *app, GtkWidget *window);
 void free_mode(GtkApplication *app, GtkWidget *window);
 void settings(GtkApplication *app);
